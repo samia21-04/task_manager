@@ -10,6 +10,7 @@ class TaskService {
   }
 
   Future<void> updateTask(Task task) async {
+    if (task.id == null) return;
     await _tasksCollection.doc(task.id).update(task.toMap());
   }
 

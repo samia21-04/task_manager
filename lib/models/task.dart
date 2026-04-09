@@ -25,12 +25,16 @@ class Task {
   }
 
   factory Task.fromMap(String id, Map<String, dynamic> map) {
+    final createdAtValue = map['createdAt'];
+
     return Task(
       id: id,
       title: map['title'] ?? '',
       isCompleted: map['isCompleted'] ?? false,
       subtasks: List<String>.from(map['subtasks'] ?? []),
-      createdAt: (map['createdAt'] as Timestamp).toDate(),
+      createdAt: createdAtValue is Timestamp
+          ? createdAtValue.toDate()
+          : DateTime.now(),
     );
   }
 
