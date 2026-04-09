@@ -49,9 +49,90 @@ class _TaskScreenState extends State<TaskScreen> {
       appBar: AppBar(
         title: const Text('Task Manager'),
       ),
-      body: const Center(
-        child: Text('UI coming next'),
+      body: Padding(
+  padding: const EdgeInsets.all(16),
+  child: Column(
+    children: [
+      Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _taskController,
+              decoration: const InputDecoration(
+                labelText: 'Enter a task',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          ElevatedButton(
+            onPressed: _addTask,
+            child: const Text('Add'),
+          ),
+        ],
       ),
-    );
-  }
-}
+      const SizedBox(height: 16),
+      Expanded(
+        child: StreamBuilder<List<Task>>(
+          stream: _taskService.streamTasks(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return const Center(
+                child: Text('Something went wrong.'),
+              );
+            }
+
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+
+            final tasks = snapshot.data ?? [];
+
+            if (tasks.isEmpty) {
+              return const Center(
+                child: Text('No tasks yet — add one above!'),
+              );
+            }
+
+            return ListView.builder(
+              itemCount: tasks.length,
+              itemBuilder: (context, index) {
+                final task = tasks[index];
+
+                return Card(
+                  child: ListTile(
+                    title: Text(
+                      task.title,
+                      style: TextStyle(
+                        decoration: task.isCompleted
+                            ? TextDecoration.lineThrough
+                            : TextDecoration.none,
+                      ),
+                    ),
+                    leading: Checkbox(
+                      value: task.isCompleted,
+                      onChanged: (_) async {
+                        final updatedTask = task.copyWith(
+                          isCompleted: !task.isCompleted,
+                        );
+                        await _taskService.updateTask(updatedTask);
+                      },
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () async {
+                        await _showDeleteDialog(task.id!);
+                      },
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    ],
+  ),
+),
