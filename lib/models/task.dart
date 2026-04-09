@@ -1,30 +1,52 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Task {
-  String? id;
-  String name;
-  bool isCompleted;
-  List<String> subtasks;
+  final String? id;
+  final String title;
+  final bool isCompleted;
+  final List<String> subtasks;
+  final DateTime createdAt;
 
   Task({
     this.id,
-    required this.name,
-    this.isCompleted = false,
-    this.subtasks = const [],
+    required this.title,
+    required this.isCompleted,
+    required this.subtasks,
+    required this.createdAt,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'name': name,
+      'title': title,
       'isCompleted': isCompleted,
       'subtasks': subtasks,
+      'createdAt': Timestamp.fromDate(createdAt),
     };
   }
 
   factory Task.fromMap(String id, Map<String, dynamic> map) {
     return Task(
       id: id,
-      name: map['name'] ?? '',
+      title: map['title'] ?? '',
       isCompleted: map['isCompleted'] ?? false,
       subtasks: List<String>.from(map['subtasks'] ?? []),
+      createdAt: (map['createdAt'] as Timestamp).toDate(),
+    );
+  }
+
+  Task copyWith({
+    String? id,
+    String? title,
+    bool? isCompleted,
+    List<String>? subtasks,
+    DateTime? createdAt,
+  }) {
+    return Task(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      isCompleted: isCompleted ?? this.isCompleted,
+      subtasks: subtasks ?? this.subtasks,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 }
